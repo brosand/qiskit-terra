@@ -1,0 +1,276 @@
+\documentclass[12pt]{article}
+\usepackage{physics}
+\usepackage{bbold}
+
+\title{Rotating Wave Approximation for QOC}
+\author{
+        Ben Rosand \\
+        IBM Quantum \\
+        Quantum Intern -- Pulse Team\\
+        Yorktown Heights, NY
+}
+\date{\today}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This is the paper's abstract \ldots
+\end{abstract}
+
+\section{Introduction}
+This is time for all good men to come to the aid of their party!
+
+\paragraph{Outline}
+The remainder of this article is organized as follows.
+Section~\ref{previous work} gives account of previous work.
+Our new and exciting results are described in Section~\ref{results}.
+Finally, Section~\ref{conclusions} gives the conclusions.
+
+\section{Previous work}\label{previous work}
+A much longer \LaTeXe{} example was written by Gil~\cite{Gil:02}.
+
+\section{Results}\label{results}
+In this section we describe the results.
+
+\section{Rotating Wave Approximation}\label{RWA}
+\subsection{Single rotation}
+We follow the template laid out in [CITE FIscher] to perform the rotating 
+wave approximation for an N-level system with one control field. For starters, we take the laboratory frame Hamiltonian [CITE FISCHER]
+\begin{equation}\large
+        H_{lab} = H_0 + \sum^M_{m=1}\Omega_m \cos(\omega_m t + \phi_m) \sum_{n'>n} g_{nn'}\sigma^x_{nn'}
+\end{equation}
+
+This generalized hamiltonian maps perfectly to our systems, with $H_0$ representing all of our time independent 
+elements. $g_{nn}$ 
+represents the prefactors on various drive terms (represented in our printed hamiltonians as $\Omega_n$).
+
+Sometimes we can ignore certain transitions because they are off-resonance. I would think this 
+would apply to the transitions to the 2 state for our systems, but need to DOUBLE CHECK.
+
+The first replacement is the basic RWA, replacing the driving terms with the terms from the RWA (FISCHER 3.25).
+also let $S = {(n,n')}$ which are on resonance and allowed.
+\begin{equation}\label{F325}
+        H_{lab} \approx H_0 + \frac{\Omega}{2} \sum_S g_{nn'} \cos(\omega t + \phi)\sigma^x_{nn'} - \sin(\omega t + \phi)\sigma^y_{nn'})
+\end{equation}
+
+Our goal here is to get rid of the oscillation $\omega t$. Again from fischer the desired transformation is:
+
+\begin{equation}
+        \ket{\psi}_{rot} = e^{-iR} \ket{\psi}_{lab}
+\end{equation}
+
+We take the derivative and obtain an equation for the transformed Hamiltonian:
+
+\begin{equation}\label{eq:4}
+        H_{rot} = e^{iR} H_{lab} e^{-iR} + \derivative{R}{t}
+\end{equation}
+
+From this equation, our goal is to find R. The core of the RWA is the following transformation:
+
+\begin{equation}\label{eq:5}
+        e^{-iR} \left \{\cos(\omega t + \phi)\sigma^x_{nn'} - \sin(\omega t + \phi)\sigma^y_{nn'}\right \}
+        e^{iR} = \cos (\phi) \sigma^x_{nn'} - sin(\phi)\sigma^y_{nn'}
+\end{equation}
+
+This transformation is applied over the set $S$ in the sum in \eqref{F325}. The final step to the transformation is to find R 
+such that these transformations hold. With that R in hand, we can see that \eqref{eq:4} evaluates to 
+\begin{equation}\label{eq:gen_trans}
+        H_{rot} = H_0 + \derivative{R}{t} + \frac{1}{2}\Omega \sum_S g_{nn'} \left \{ \cos{\phi} \sigma^x_{nn'} - sin{\phi} \sigma^y_{nn'} \right \}
+\end{equation}
+
+This is the rotating frame Hamiltonian, the key difference being the lack of oscillation on $\omega$ (carrier frequency), 
+which is moved into the "generalised detuning term" $H_0 + \derivative{R}{t}$. Note that in the two-level case this term 
+reduces to $\frac{1}{2} \delta \omega \sigma^z$
+
+What does equation \eqref{eq:gen_trans} look like for IBM Q devices? All variables can be fillled in except for R,
+which can be solved through another process which will be shown after.
+\begin{align}
+        & H_0 = H_d + H_{coupling} + H_{occupation_operator} \\
+        & \Omega = \Omega_{d,i} \qquad \text{Note that this transformation is for only one drive} \\
+        & g_{nn'} = 1
+\end{align}
+\textit{$g_{nn'}$ is technically contained in $\Omega$ because we are off resonance so only concerned with 0 to 1 transition}
+
+\subsection{Determining transformation matrix R}
+The matrix R is derived from equation \eqref{eq:5}. The two relationships that Fischer uses to make this derivation are the 
+fact that R and $\sigma^z_{nn'}$ commute.
+
+\subsection{Multiple drives and rotations}
+
+\section{Rotating Wave Approximation for athens+}
+Note that for any more qubits the system looks the same, this is the minimal example.
+What does the lab Hamiltonian look like?
+\begin{align} \label{eq:athens_hamiltonian}
+         & \mathcal{H}/\hbar =
+          \sum_{i=0}^{4}\left(\frac{\omega_{q,i}}{2}(\mathbb{I}-\sigma_i^{z})+\frac{\Delta_{i}}{2}(O_i^2-O_i)+\Omega_{d,i}D_i(t)\sigma_i^{X}\right) \\
+         & + J_{1,2}(\sigma_{1}^{+}\sigma_{2}^{-}+\sigma_{1}^{-}\sigma_{2}^{+}) + J_{3,4}(\sigma_{3}^{+}\sigma_{4}^{-}+\sigma_{3}^{-}\sigma_{4}^{+}) \\ 
+         & + J_{0,1}(\sigma_{0}^{+}\sigma_{1}^{-}+\sigma_{0}^{-}\sigma_{1}^{+}) + J_{2,3}(\sigma_{2}^{+}\sigma_{3}^{-}+\sigma_{2}^{-}\sigma_{3}^{+}) \\ 
+         & + \Omega_{d,0}(U_{0}^{(0,1)}(t))\sigma_{0}^{X} + \Omega_{d,1}(U_{1}^{(1,0)}(t)+U_{2}^{(1,2)}(t))\sigma_{1}^{X} \\ 
+         & + \Omega_{d,2}(U_{3}^{(2,1)}(t)+U_{4}^{(2,3)}(t))\sigma_{2}^{X} + \Omega_{d,3}(U_{6}^{(3,4)}(t)+U_{5}^{(3,2)}(t))\sigma_{3}^{X} \\
+         & + \Omega_{d,4}(U_{7}^{(4,3)}(t))\sigma_{4}^{X} \\
+\end{align}
+
+For this example, we are only concerned with the single qubit case ( we will extend to 2q later). We are only going to model at most 2q at a time.
+
+In this case, the lab hamiltonian looks like this:
+
+\begin{align} \label{eq:athens_singleq}
+         & \mathcal{H}/\hbar = \frac{\omega_{q,0}}{2}(\mathbb{I}-\sigma_0^{z})+\frac{\Delta_{0}}{2}(O_0^2-O_0)+\Omega_{d,0}D_0(t)\sigma_0^{X}\\
+         & + J_{0,1}(\sigma_{0}^{+}\sigma_{1}^{-}+\sigma_{0}^{-}\sigma_{1}^{+}) \\
+         & + \Omega_{d,0}(U_{0}^{(0,1)}(t))\sigma_{0}^{X}
+\end{align}
+
+Now the last term is the control channel, which we can ignore for the 1q situation.
+in addition, we can combine all the time independent parts to form $H_0$, giving us 
+\begin{equation}
+         \mathcal{H}/ \hbar = H_0 + \Omega_{d_0} D_0(t) \sigma_0^x
+\end{equation}
+
+Now if we look back at \eqref{eq:gen_trans} we see clear places to plug our numbers in. R
+is obtained on the side.
+\subsection{What about the drive term?}
+The drive term that we see in the lab frame (after droppingcounter rotating
+terms and replacing with RWA) is 
+\begin{equation}
+        H_{lab} \approx H_0 + \frac{\Omega}{2} \sum_S g_{nn'} \cos(\omega t + \phi)\sigma^x_{nn'} - \sin(\omega t + \phi)\sigma^y_{nn'})
+\end{equation}
+
+The drive term that we see from athens is:
+
+\begin{equation}
+        \Omega_{d_0} D_0(t) \sigma_0^x
+\end{equation}
+
+
+I'm pretty sure that this works out fine with the RWA (part 1? Fischer says use it to get to here but it still has the t terms so not sure) and we get 
+
+\begin{equation}
+        H_{rot} = H_0 + \frac{\Omega_{d_0}}{2} \left[ \cos(\omega t + \phi)\sigma^x_{01} - \sin(\omega t + \phi)\sigma^y_{01} \right]
+\end{equation}
+
+\subsection{Finding R for single q athens}
+To find R, we look at equation 3.40 from Fischer: 
+\begin{equation}
+        [R, \sigma^x_{nn'} = \omega t(i \omega^y_{nn'})]
+\end{equation}
+
+then we get the system of equations:
+\begin{align}
+        & c_{01}(2 i \sigma^y_{01}) + c_{12}(- i \sigma^y_{01}) = \omega t (i \sigma^y_{01})\\
+        & c_{01}(- i \sigma^y_{12}) + c_{12}(2 \sigma^y_{01}) = \omega t (i \sigma^y_{12})\\
+\end{align}
+
+when we solve this system of equations we get:
+$c_{01} = c_{12} \omega t$
+
+Thus $R = \omega t \left[\sigma^z_{01} + \sigma^z_{12}\right]$
+
+
+
+
+Therefore, our hamiltonian is almost in the rotating frame:
+% \begin{equation}\label{eq:post_r_ham}
+% \begin{split}
+%         & H_{lab} \approx H_0 + \omega \left[\sigma^z_{01} + \sigma^z_{12}\right] \\ 
+%         & + \frac{\Omega_{d_0}}{2} \left[ \cos(\omega t + \phi)\sigma^x_{01} - \sin(\omega t + \phi)\sigma^y_{01} \right]
+% \end{split}
+% \end{equation}
+
+The final step is to 
+
+\subsection{Converting to format for qutip}
+In order to run qutip we need to factor out the t
+
+we start with \eqref{eq:post_r_ham} and focus on the drive term, setting
+$\cos{(\omega t + \phi)}$ to $f(t)$ and $\sin{(\omega t + \phi)}$ to $f'(t)$
+
+\begin{equation}
+\begin{split}
+        & H_{rot} = H_0 + \omega \left[\sigma^z_{01} + \sigma^z_{12}\right] \\ 
+        & + \frac{\Omega_{d_0}}{2} \left[ f(t) + f'(t) \right]
+\end{split}
+\end{equation}
+
+\subsection{The rotating frame transformation}
+
+Starting with equation (3.26) from Fischer, we see 
+\begin{equation}\label{eq:post_r_ham}
+\begin{split}
+        & H_{lab} \approx H_0 + \omega \left[\sigma^z_{01} + \sigma^z_{12}\right] \\ 
+        & + \frac{\Omega_{d_0}}{2} \left[ \cos(\omega t + \phi)\sigma^x_{01} - \sin(\omega t + \phi)\sigma^y_{01} \right]
+\end{split}
+\end{equation}
+we start by making the assumption that their exists some $R$ such that
+
+\begin{equation}
+        \ket{\psi}_{rot} = e^{-iR} \ket{\psi}_{lab}
+\end{equation}
+
+We take the derivative and find the hamiltonian 
+
+\begin{equation}
+        H_{rot} = e^{-iR} H_{lab} e^{ir} + \derivative{R}{t}
+\end{equation}
+
+The terms inside of the sum in the hamiltonian are orthogonal to each other.
+Therefore the $\omega$ oscillation must be removed separately.
+
+Ultimately we seek some $R$ that allows the transformation which removes the time dependence 
+
+\begin{equation}
+        \begin{split}
+                & e^{-i R}\left[ \cos(\omega t + \phi)\sigma^x_{01} - \sin(\omega t + \phi)\sigma^y_{01}\right] e^{iR} \\
+                & = \cos{(\phi)} \sigma^x_{01} - \sin{(\phi)} \sigma^y_{01}
+        \end{split}
+\end{equation}
+
+... find the R section
+
+Now that we have R, we get 
+
+\begin{equation}\label{eq:rotating_frame_ham}
+        \begin{split}
+        & H_{rot} = H_0 + \omega \left[\sigma^z_{01} + \sigma^z_{12}\right] \\
+        & + \frac{\Omega_{d_0}}{2} \qty[\cos{\phi} \sigma^x_{01} - \sin{\phi} \sigma^y_{01}]
+        \end{split}
+\end{equation}
+
+In order to convert this to a format more easily digestible for qutip we need to replace the cos and sin, which we do
+
+$H(t) = H_d + \sum(u_1(t)H_{c1} + u_2(t)H_{c2} + ....)$
+
+Goal:
+\begin{align}
+        & \cos{\phi(t)} \sigma^x_{01} - \sin{\phi(t)} \sigma^y_{01} = a*f(t) +b*g(t)\\
+        & \cos{\phi(t)}^2 + \sin{\phi}^2 = 1\\
+        &  f(t) \neq f(s(t)) \qquad \& \qquad g(t) \neq g(u(t))\\
+        & s(t), u(t) \notin \text{first order}
+\end{align}
+
+\begin{align}
+        & f(t) = a \cos{x} - b \sin{x} \\
+        & f(t) = \frac{a}{2} \qty[ e^{ix} + e^{-ix}] - \frac{b}{2i} \qty[e^{ix} - e^{-ix}]
+        & D(t) = f(t)
+\end{align}
+
+\section{Conclusions}\label{conclusions} We worked
+hard, and achieved very little.
+
+\section{Notes that may be useful}
+\begin{align}
+        & H_c = [cos(\phi) * \sigma_x + sin(\phi) * \sigma_y()] \\
+        & d(t)*H_c = H(t) \\
+        & d(t) [cos(\phi(t)) * \sigma_x() + sin(\phi) * \sigma_y()] = H(t) \\
+        & f(t) = d(t) * cos(\phi(t)) \\
+        & [d(t) cos(\phi(t)) * \omega_d0 * \sigma_x(), d(t) sin(\phi(t)) * \omega_d0 * \sigma_y()] \\
+        & [f(t) * \omega_d0 * \sigma_x(), f1(t) * \omega_d0 * \sigma_y()] \\
+        & f(t) = d(t) * cos(\phi(t)) \\
+        & f1(t) = d(t) * sin(\phi(t)) \\
+        &  D(t) = f(t) + i * f1(t)
+\end{align}
+\bibliographystyle{abbrv}
+\bibliography{main}
+
+\end{document}
